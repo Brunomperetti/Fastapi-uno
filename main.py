@@ -4,7 +4,7 @@ import pandas as pd
 app = FastAPI()
 
 # Cargar los datasets
-credits_df = pd.read_parquet('dataset_credits.parquet', engine='pyarrow')
+credits_df = pd.read_parquet('dataset/dataset_credits.parquet')
 movies_df = pd.read_parquet('dataset_movies.parquet', engine='pyarrow')
 
 
