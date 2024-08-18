@@ -1,19 +1,57 @@
 from fastapi import FastAPI, HTTPException
 import pandas as pd
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
+
+
 
 # Cargar los datasets
 credits_df = pd.read_parquet('dataset/dataset_credits.parquet')
 movies_df = pd.read_parquet('dataset/dataset_movies.parquet')
 
-
-
-# Cargar el DataFrame
 try:
     movies_df['release_date'] = pd.to_datetime(movies_df['release_date'], errors='coerce')
 except Exception as e:
     raise HTTPException(status_code=500, detail=f"Error al cargar el archivo CSV: {str(e)}")
+
+# Preparar el modelo de recomendación
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf_vectorizer.fit_transform(movies_df['overview'].fillna(''))
+
+def recomendar_peliculas(titulo_pelicula, num_recomendaciones=5):
+    # Verificar si la película está en el dataset
+    if titulo_pelicula not in movies_df['title'].values:
+        raise HTTPException(status_code=404, detail="Película no encontrada, verifique que la palabra este escrita correctamente con la primera letra en mayúscula.")
+    
+    # Obtener el índice de la película
+    idx = movies_df[movies_df['title'] == titulo_pelicula].index[0]
+    
+    # Calcular la similitud con todas las demás películas
+    cosine_similarities = cosine_similarity(tfidf_matrix[idx:idx+1], tfidf_matrix).flatten()
+    
+    # Obtener los índices de las películas más similares
+    similar_indices = cosine_similarities.argsort()[-num_recomendaciones-1:-1][::-1]
+    
+    # Obtener los nombres de las películas más similares
+    similar_movies = movies_df['title'].iloc[similar_indices].tolist()
+    return similar_movies
+
+class MovieTitle(BaseModel):
+    titulo_de_la_pelicula: str
+
+@app.post("/recomendaciones de Peliculas/")
+def recomendacion(movie: MovieTitle):
+    titulo_pelicula = movie.titulo_de_la_pelicula
+    
+    # Obtener las recomendaciones
+    similar_movies = recomendar_peliculas(titulo_pelicula)
+    
+    return {"Te recomendamos las siguientes peliculas": similar_movies}
 
 
 
@@ -148,3 +186,5 @@ def get_director(nombre_director: str):
         "exito_total": round(exito_total, 2),
         "peliculas": peliculas_lista
     }
+
+
