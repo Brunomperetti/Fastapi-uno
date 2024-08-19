@@ -17,34 +17,6 @@ try:
 except Exception as e:
     raise HTTPException(status_code=500, detail=f"Error al cargar el archivo CSV: {str(e)}")
 
-# Preparar el modelo de recomendación
-tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf_vectorizer.fit_transform(movies_df['overview'].fillna(''))
-
-def recomendar_peliculas(titulo_pelicula, num_recomendaciones=5):
-    # Verificar si la película está en el dataset
-    if titulo_pelicula not in movies_df['title'].values:
-        raise HTTPException(status_code=404, detail="Película no encontrada, verifique que la palabra esté escrita correctamente con la primera letra en mayúscula.")
-    
-    # Obtener el índice de la película
-    idx = movies_df[movies_df['title'] == titulo_pelicula].index[0]
-    
-    # Calcular la similitud con todas las demás películas
-    cosine_similarities = cosine_similarity(tfidf_matrix[idx:idx+1], tfidf_matrix).flatten()
-    
-    # Obtener los índices de las películas más similares
-    similar_indices = cosine_similarities.argsort()[-num_recomendaciones-1:-1][::-1]
-    
-    # Obtener los nombres de las películas más similares
-    similar_movies = movies_df['title'].iloc[similar_indices].tolist()
-    return similar_movies
-
-@app.get("/Recomendaciones_de_peliculas/",description= "Devuelve una listas de peliculas recomendadas basadas en la similitud del titulo")
-def recomendacion(titulo_pelicula: str= "Dracula"):
-    # Obtener las recomendaciones
-    similar_movies = recomendar_peliculas(titulo_pelicula)
-    
-    return {"Te recomendamos las siguientes películas": similar_movies}
 
 @app.get("/Cantidad_estrenos_mes/", description= "Devuelve el numero de peliculas estrenadas en un mes especifico")
 async def cantidad_estrenos_mes(mes: str= "Enero"):
@@ -175,3 +147,31 @@ def get_director(nombre_director: str= "Steven Spielberg"):
         "peliculas": peliculas_lista
     }
 
+# Preparar el modelo de recomendación
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf_vectorizer.fit_transform(movies_df['overview'].fillna(''))
+
+def recomendar_peliculas(titulo_pelicula, num_recomendaciones=5):
+    # Verificar si la película está en el dataset
+    if titulo_pelicula not in movies_df['title'].values:
+        raise HTTPException(status_code=404, detail="Película no encontrada, verifique que la palabra esté escrita correctamente con la primera letra en mayúscula.")
+    
+    # Obtener el índice de la película
+    idx = movies_df[movies_df['title'] == titulo_pelicula].index[0]
+    
+    # Calcular la similitud con todas las demás películas
+    cosine_similarities = cosine_similarity(tfidf_matrix[idx:idx+1], tfidf_matrix).flatten()
+    
+    # Obtener los índices de las películas más similares
+    similar_indices = cosine_similarities.argsort()[-num_recomendaciones-1:-1][::-1]
+    
+    # Obtener los nombres de las películas más similares
+    similar_movies = movies_df['title'].iloc[similar_indices].tolist()
+    return similar_movies
+
+@app.get("/Recomendaciones_de_peliculas/",description= "Devuelve una listas de peliculas recomendadas basadas en la similitud del titulo")
+def recomendacion(titulo_pelicula: str= "Dracula"):
+    # Obtener las recomendaciones
+    similar_movies = recomendar_peliculas(titulo_pelicula)
+    
+    return {"Te recomendamos las siguientes películas": similar_movies}
