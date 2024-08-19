@@ -39,14 +39,14 @@ def recomendar_peliculas(titulo_pelicula, num_recomendaciones=5):
     similar_movies = movies_df['title'].iloc[similar_indices].tolist()
     return similar_movies
 
-@app.get("/Devuelve_una_lista_de_peliculas_recomendadas_basadas_en_la_similitud_con_el_titulo/{Titulo_Pelicula}")
+@app.get("/Recomendaciones_de_peliculas/",description= "Devuelve una listas de peliculas recomendadas basadas en la similitud del titulo")
 def recomendacion(titulo_pelicula: str= "Dracula"):
     # Obtener las recomendaciones
     similar_movies = recomendar_peliculas(titulo_pelicula)
     
     return {"Te recomendamos las siguientes películas": similar_movies}
 
-@app.get("/devuelve_el_numero_de_peliculas_filmadas_en_un_mes_especifico/{Mes}")
+@app.get("/Cantidad_filmaciones_mes/", description= "Devuelve el numero de peliculas filmadas en un mes especifico")
 async def cantidad_filmaciones_mes(mes: str= "Enero"):
     try:
         # Diccionario para convertir el nombre del mes en español a número
@@ -68,7 +68,7 @@ async def cantidad_filmaciones_mes(mes: str= "Enero"):
 
 
 
-@app.get('/proporciona_la_cantidad_de_peliculas_filmadas_en_un_dia_especifico/{Dia}')
+@app.get("/cantidad_filmaciones_dia/", description= "Proporciona la cantidad de peliculas filmadas en un día especifico")
 def cantidad_filmaciones_dia(dia: str= "Lunes"):
     # Diccionario para traducir los días de español a números
     dias_espanol = {
@@ -88,7 +88,7 @@ def cantidad_filmaciones_dia(dia: str= "Lunes"):
     return f"{cantidad} cantidad de películas fueron estrenadas en los días {dia.capitalize()}."
 
 
-@app.get('/devuelve_en_que_año_fue_estrenada_y_la_popularidad_de_una_pelicula/{Titulo_Pelicula}')
+@app.get("/score_titulo/", description= "Devuelve el año de estreno y la popularidad de una película según su título")
 def popularidad_titulo(titulo: str= "Toy Story"):
     # Filtrar la película por título
     pelicula = movies_df[movies_df['title'].str.lower() == titulo.lower()]
@@ -103,7 +103,7 @@ def popularidad_titulo(titulo: str= "Toy Story"):
     return f"La película {titulo} fue estrenada en el año {anio} con un score/popularidad de {score}."
 
 
-@app.get('/devuelve_la_cantidad_total_de_votos_de_una_pelicula_basada_en_su_titulo/{Titulo_Pelicula}')
+@app.get("/votos_titulo/", description= "Devuelve el año de estreno y la cantidad total de votos de una película basada en su título")
 def votos_titulo(titulo: str= "Titanic"):
     # Filtrar la película por título
     pelicula = movies_df[movies_df['title'].str.lower() == titulo.lower()]
@@ -124,7 +124,7 @@ def votos_titulo(titulo: str= "Titanic"):
 # Realizar el merge de los DataFrames usando la columna común
 merged_df = pd.merge(credits_df, movies_df, on='id')
 
-@app.get('/get_actor/{Actor}')
+@app.get("/get_actor/", description= "Devuelve la cantidad de películas, la recaudación total y el promedio de recaudación de un actor específico")
 def get_actor(nombre_actor: str= "Jim Carrey"):
     # Filtrar el DataFrame por el nombre del actor en la columna 'cast_name'
     actor_df = merged_df[merged_df['cast_name'] == nombre_actor]
@@ -149,7 +149,7 @@ def get_actor(nombre_actor: str= "Jim Carrey"):
     }
 
 
-@app.get('/get_director/{Director}')
+@app.get("/get_director/", description= "Devuelve la lista de películas dirigidas por un director específico, incluyendo la fecha de lanzamiento, el retorno, el costo y la ganancia. También muestra el éxito total en términos de retorno de todas las películas del director.")
 def get_director(nombre_director: str= "Steven Spielberg"):
     # Filtrar el DataFrame para obtener solo registros donde el director es el solicitado
     director_df = merged_df[(merged_df['crew_name'] == nombre_director) & (merged_df['crew_job'] == 'Director')]
