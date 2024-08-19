@@ -97,7 +97,7 @@ def votos_titulo(titulo: str= "Titanic"):
 merged_df = pd.merge(credits_df, movies_df, on='id')
 
 @app.get("/get_actor/", description= "Devuelve la cantidad de películas, la recaudación total y el promedio de recaudación de un actor específico")
-def get_actor(nombre_actor: str= "Jim Carrey"):
+def get_actor(nombre_actor: str= "Samuel L. Jackson"):
     # Filtrar el DataFrame por el nombre del actor en la columna 'cast_name'
     actor_df = merged_df[merged_df['cast_name'] == nombre_actor]
     
