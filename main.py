@@ -8,8 +8,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
 
-
-
 # Cargar los datasets
 credits_df = pd.read_parquet('dataset/dataset_credits.parquet')
 movies_df = pd.read_parquet('dataset/dataset_movies.parquet')
@@ -26,7 +24,7 @@ tfidf_matrix = tfidf_vectorizer.fit_transform(movies_df['overview'].fillna(''))
 def recomendar_peliculas(titulo_pelicula, num_recomendaciones=5):
     # Verificar si la película está en el dataset
     if titulo_pelicula not in movies_df['title'].values:
-        raise HTTPException(status_code=404, detail="Película no encontrada, verifique que la palabra este escrita correctamente con la primera letra en mayúscula.")
+        raise HTTPException(status_code=404, detail="Película no encontrada, verifique que la palabra esté escrita correctamente con la primera letra en mayúscula.")
     
     # Obtener el índice de la película
     idx = movies_df[movies_df['title'] == titulo_pelicula].index[0]
@@ -41,21 +39,14 @@ def recomendar_peliculas(titulo_pelicula, num_recomendaciones=5):
     similar_movies = movies_df['title'].iloc[similar_indices].tolist()
     return similar_movies
 
-class MovieTitle(BaseModel):
-    titulo_de_la_pelicula: str
-
-@app.post("/recomendaciones de Peliculas/")
-def recomendacion(movie: MovieTitle):
-    titulo_pelicula = movie.titulo_de_la_pelicula
-    
+@app.get("/Devuelve_una_lista_de_peliculas_recomendadas_basadas_en_la_similitud_con_el_titulo/{Ejemplo_Dracula}")
+def recomendacion(titulo_pelicula: str):
     # Obtener las recomendaciones
     similar_movies = recomendar_peliculas(titulo_pelicula)
     
-    return {"Te recomendamos las siguientes peliculas": similar_movies}
+    return {"Te recomendamos las siguientes películas": similar_movies}
 
-
-
-@app.get("/cantidad_filmaciones_mes/{mes}")
+@app.get("/devuelve_el_numero_de_peliculas_filmadas_en_un_mes_especifico/{Ejemplo_Abril}")
 async def cantidad_filmaciones_mes(mes: str):
     try:
         # Diccionario para convertir el nombre del mes en español a número
@@ -77,7 +68,7 @@ async def cantidad_filmaciones_mes(mes: str):
 
 
 
-@app.get('/cantidad_filmaciones_dia/{dia}')
+@app.get('/proporciona_la_cantidad_de_peliculas_filmadas_en_un_dia_especifico/{Ejemplo_Lunes}')
 def cantidad_filmaciones_dia(dia: str):
     # Diccionario para traducir los días de español a números
     dias_espanol = {
@@ -97,10 +88,8 @@ def cantidad_filmaciones_dia(dia: str):
     return f"{cantidad} cantidad de películas fueron estrenadas en los días {dia.capitalize()}."
 
 
-
-
-@app.get('/score_titulo/{titulo}')
-def score_titulo(titulo: str):
+@app.get('/devuelve_en_que_año_fue_estrenada_y_la_popularidad_de_una_pelicula/{Ejemplo_Toy_Story}')
+def popularidad_titulo(titulo: str):
     # Filtrar la película por título
     pelicula = movies_df[movies_df['title'].str.lower() == titulo.lower()]
     
@@ -114,8 +103,7 @@ def score_titulo(titulo: str):
     return f"La película {titulo} fue estrenada en el año {anio} con un score/popularidad de {score}."
 
 
-
-@app.get('/votos_titulo/{titulo}')
+@app.get('/devuelve_la_cantidad_total_de_votos_de_una_pelicula_basada_en_su_titulo/{Ejemplo_Titanic}')
 def votos_titulo(titulo: str):
     # Filtrar la película por título
     pelicula = movies_df[movies_df['title'].str.lower() == titulo.lower()]
@@ -136,7 +124,7 @@ def votos_titulo(titulo: str):
 # Realizar el merge de los DataFrames usando la columna común
 merged_df = pd.merge(credits_df, movies_df, on='id')
 
-@app.get('/get_actor/{nombre_actor}')
+@app.get('/get_actor/{Ejemplo_Jim_Carrey}')
 def get_actor(nombre_actor: str):
     # Filtrar el DataFrame por el nombre del actor en la columna 'cast_name'
     actor_df = merged_df[merged_df['cast_name'] == nombre_actor]
@@ -161,7 +149,7 @@ def get_actor(nombre_actor: str):
     }
 
 
-@app.get('/get_director/{nombre_director}')
+@app.get('/get_director/{Ejemplo_Steven_Spielberg}')
 def get_director(nombre_director: str):
     # Filtrar el DataFrame para obtener solo registros donde el director es el solicitado
     director_df = merged_df[(merged_df['crew_name'] == nombre_director) & (merged_df['crew_job'] == 'Director')]
@@ -186,5 +174,4 @@ def get_director(nombre_director: str):
         "exito_total": round(exito_total, 2),
         "peliculas": peliculas_lista
     }
-
 
