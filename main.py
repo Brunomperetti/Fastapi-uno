@@ -46,8 +46,8 @@ def recomendacion(titulo_pelicula: str= "Dracula"):
     
     return {"Te recomendamos las siguientes películas": similar_movies}
 
-@app.get("/Cantidad_filmaciones_mes/", description= "Devuelve el numero de peliculas filmadas en un mes especifico")
-async def cantidad_filmaciones_mes(mes: str= "Enero"):
+@app.get("/Cantidad_estrenos_mes/", description= "Devuelve el numero de peliculas estrenadas en un mes especifico")
+async def cantidad_estrenos_mes(mes: str= "Enero"):
     try:
         # Diccionario para convertir el nombre del mes en español a número
         months_dict = {
@@ -68,8 +68,8 @@ async def cantidad_filmaciones_mes(mes: str= "Enero"):
 
 
 
-@app.get("/cantidad_filmaciones_dia/", description= "Proporciona la cantidad de peliculas filmadas en un día especifico")
-def cantidad_filmaciones_dia(dia: str= "Lunes"):
+@app.get("/cantidad_estrenos_dia/", description= "Proporciona la cantidad de peliculas estrenadas en un día especifico")
+def cantidad_estrenos_dia(dia: str= "Lunes"):
     # Diccionario para traducir los días de español a números
     dias_espanol = {
         'lunes': 0, 'martes': 1, 'miércoles': 2, 'jueves': 3,
